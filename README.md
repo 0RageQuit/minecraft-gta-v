@@ -40,7 +40,7 @@ Creative: double-tap Space to fly; Space rises, Shift descends. Elytra: equip in
 
 ## Status and limitations
 
-Experimental candidate 0.1.3-melty. Both mod halves build. The submitted Melty draft passes its one-click check with no manual installation steps. The revised native adapter was played locally in GTA Legacy Story Mode without ScriptHookV: Minecraft movement, inventory/menu controls and F8 worked, and real gameplay media was captured. The player chose to quit after that session; the launcher recorded an exit error, which remains a testing limitation. A full install-and-Play verification through Melty remains pending.
+Experimental candidate 0.1.4-melty. Both mod halves build. The submitted Melty draft passes its one-click check with no manual installation steps. The revised native adapter was played locally in GTA Legacy Story Mode without ScriptHookV: Minecraft movement, inventory/menu controls and F8 worked, and real gameplay media was captured. The player chose to quit after that session; the launcher recorded an exit error, which remains a testing limitation. A full install-and-Play verification through Melty remains pending.
 
 Collision on unusual surfaces, shaped blocks, moving platforms and fast camera turns needs broader testing. Recent turn snapshots confirmed filled screen edges but do not prove every transient frame. Some inherited combat/Nether systems have not been reverified in the latest build. Both games run simultaneously and require substantial resources. GTA roads/buildings cannot be mined. GTA Enhanced and GTA Online are not supported by this version.
 
@@ -50,7 +50,7 @@ Supported development versions: Minecraft Java 26.3, Fabric Loader 0.19.5, Fabri
 
 The Melty release contains the rebuilt GTA ASI, Fabric mod, shader, ReShade runtime, portable Prism launcher, Java and Fabric API. `melty.json` maps every file and starts both games. Melty installs Ultimate ASI Loader; ScriptHookV is no longer imported or required by the rebuilt plugin. The companion configures a dedicated Minecraft instance automatically. First setup asks for the player's own Microsoft account, and Prism obtains Minecraft through its normal authenticated download. No game content, saves, skins or player credentials are shipped.
 
-The 0.1.3-melty candidate is attached to the Melty draft. Its GitHub release is being prepared as a draft while final Play verification is pending; see [releases](https://github.com/0RageQuit/minecraft-gta-v/releases) for public downloads. The playable archive is `Minecraft-GTA-V-0.1.3-melty.zip`; the separate source ZIP is for development. The older v0.1.0 release and root `Minecraft-GTA-V-private-draft.zip` are historical builds that require manual setup.
+The 0.1.4-melty candidate is attached to the Melty draft. Its GitHub release is being prepared as a draft while final Play verification is pending; see [releases](https://github.com/0RageQuit/minecraft-gta-v/releases) for public downloads. The playable archive is `Minecraft-GTA-V-0.1.4-melty.zip`; the separate source ZIP is for development. The older v0.1.0 release and root `Minecraft-GTA-V-private-draft.zip` are historical builds that require manual setup.
 
 See [installation notes](docs/INSTALL.md) for the automatic setup and build instructions. [The upstream technical guide](docs/UPSTREAM-README.md) describes historical 0.1.0 setup and must not be used as the new release instructions. See [dependency credits](docs/CREDITS.txt) for the bundled components and their separate licenses.
 

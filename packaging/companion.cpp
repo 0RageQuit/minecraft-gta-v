@@ -22,7 +22,8 @@ static std::filesystem::path realPath(const std::filesystem::path& path) {
 
 // Configures only this release's dedicated portable Prism data folder.
 // Microsoft authentication stays inside Prism; no accounts or tokens are copied.
-int WINAPI wWinMain(HINSTANCE,HINSTANCE,PWSTR,int) {
+int WINAPI wWinMain(HINSTANCE,HINSTANCE,PWSTR commandLine,int) {
+    const bool prepareOnly=commandLine && !_wcsicmp(commandLine,L"--prepare-only");
     wchar_t executable[32768]{},local[32768]{};
     GetModuleFileNameW(nullptr,executable,32768);
     GetEnvironmentVariableW(L"LOCALAPPDATA",local,32768);
@@ -37,11 +38,13 @@ int WINAPI wWinMain(HINSTANCE,HINSTANCE,PWSTR,int) {
             wchar_t path[32768]{}; DWORD length=32768;
             bool alreadyRunning=process && QueryFullProcessImageNameW(process,0,path,&length) && !_wcsicmp(path,java.c_str());
             if(process) CloseHandle(process);
-            if(alreadyRunning) { CloseHandle(snapshot); return 0; }
+            if(alreadyRunning && !prepareOnly) { CloseHandle(snapshot); return 0; }
         } while(Process32NextW(snapshot,&entry));
         CloseHandle(snapshot);
     }
-    const auto requestedRoot=std::filesystem::path(local)/L"MinecraftGTAV";
+    wchar_t dataOverride[32768]{};
+    GetEnvironmentVariableW(L"MINECRAFT_GTAV_DATA_ROOT",dataOverride,32768);
+    const auto requestedRoot=*dataOverride ? std::filesystem::path(dataOverride) : std::filesystem::path(local)/L"MinecraftGTAV";
     std::filesystem::create_directories(requestedRoot);
     const auto root=realPath(requestedRoot);
     const auto data=root/L"prism";
@@ -52,8 +55,13 @@ int WINAPI wWinMain(HINSTANCE,HINSTANCE,PWSTR,int) {
         std::ofstream defaults(launcherConfig);
         defaults<<"[General]\nLanguage=en_US\nIgnoreJavaWizard=true\nAutomaticJavaDownload=false\nAutomaticJavaSwitch=false\nUserAskedAboutAutomaticJavaDownload=true\nPastebinURL=\nApplicationTheme=dark\nIconTheme=pe_colored\nJavaPath="<<(install/L"java"/L"bin"/L"javaw.exe").generic_string()<<"\n";
     }
-    for (const auto& entry:std::filesystem::directory_iterator(install/L"minecraft"/L"mods"))
-        std::filesystem::copy_file(entry.path(),instance/L".minecraft"/L"mods"/entry.path().filename(),std::filesystem::copy_options::overwrite_existing);
+    // Melty installs the jars directly into the active instance, so it can
+    // verify Fabric's real loading log beside them. Support older local layouts.
+    const auto legacyMods=install/L"minecraft"/L"mods";
+    if(std::filesystem::is_directory(legacyMods))
+        for (const auto& entry:std::filesystem::directory_iterator(legacyMods))
+            if(entry.is_regular_file() && entry.path().extension()==L".jar")
+                std::filesystem::copy_file(entry.path(),instance/L".minecraft"/L"mods"/entry.path().filename(),std::filesystem::copy_options::overwrite_existing);
     std::filesystem::copy_file(install/L"minecraft"/L"mmc-pack.json",instance/L"mmc-pack.json",std::filesystem::copy_options::overwrite_existing);
     const auto cfg=instance/L"instance.cfg";
     // Preserve account association and player choices, while replacing this mod's required settings.
@@ -74,6 +82,7 @@ int WINAPI wWinMain(HINSTANCE,HINSTANCE,PWSTR,int) {
     output<<"OverrideJavaArgs=true\nJvmArgs=--enable-native-access=ALL-UNNAMED -Dpassthrough.maxFps=60 -Dpassthrough.ownSkin=true\nOverrideMemory=true\nMinMemAlloc=512\nMaxMemAlloc=4096\n";
     output<<other;
     output.close();
+    if(prepareOnly) return 0;
     const auto launcher=install/L"launcher"/L"prismlauncher.exe";
     const std::wstring arguments=L"-d \""+data.wstring()+L"\" -l minecraft-gta-v --show-window";
     const auto result=reinterpret_cast<INT_PTR>(ShellExecuteW(nullptr,L"open",launcher.c_str(),arguments.c_str(),install.c_str(),SW_SHOWNORMAL));

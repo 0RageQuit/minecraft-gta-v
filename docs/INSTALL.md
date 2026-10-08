@@ -1,4 +1,4 @@
-# Minecraft GTA V — automatic Melty setup (0.1.3-melty candidate)
+# Minecraft GTA V — automatic Melty setup (0.1.4-melty candidate)
 
 Requires the player's own GTA V Legacy build 1.0.3889.0 and Minecraft Java 26.3 entitlement. Both games run on the same Windows PC. Single player, Story Mode only; Enhanced and Online are unsupported.
 
@@ -6,11 +6,11 @@ Requires the player's own GTA V Legacy build 1.0.3889.0 and Minecraft Java 26.3 
 
 The installed recipe in melty.json places the rebuilt GTA plugin, ReShade runtime, shader and configurations beside GTA5.exe. Melty installs Ultimate ASI Loader. The plugin uses its own native adapter and no longer imports ScriptHookV.
 
-The release bundles portable Prism, Java 25, Fabric API and the rebuilt Minecraft mod. The companion automatically creates a dedicated Minecraft 26.3/Fabric 0.19.5 instance under LocalAppData/MinecraftGTAV/prism, selects the bundled Java and installs both mod jars. Players do not configure Java or Fabric or copy mod files.
+The release bundles portable Prism, Java 25, Fabric API and the rebuilt Minecraft mod. The companion automatically creates a dedicated Minecraft 26.3/Fabric 0.19.5 instance under LocalAppData/MinecraftGTAV/prism, selects the bundled Java and Melty places both mod jars directly in that instance. Players do not configure Java or Fabric or copy mod files.
 
 First setup asks for the player's own Microsoft account. Prism downloads Minecraft through its normal authenticated flow. The release contains no game content, accounts, skins or saves. Minecraft automatically opens its dedicated world and logs 'Minecraft companion ready'; Melty waits for this before launching GTA in Story Mode with BattlEye disabled. Rockstar connects normally for activation of the player's own copy; the recipe does not force offline mode. Subsequent Play starts both programs. Passthrough is enabled by default once connected. F7 toggles the view, F8 switches Minecraft/GTA controls and F9 relevels the ground.
 
-Version 0.1.3-melty removes the forced-offline argument from 0.1.1-melty, which could make Rockstar close a Steam copy with an activation-required message. It also removes the multiplayer shortcut argument accidentally retained in 0.1.2-melty. The recipe now uses the normal detected-game launch with -nobattleye only. It changes packaging and launch arguments; the tested Minecraft/GTA gameplay components remain the same. Normal Rockstar/Steam authentication still applies. An account sign-in, if required by Rockstar, must be completed by the player.
+Version 0.1.4-melty removes the forced-offline argument from 0.1.1-melty, which could make Rockstar close a Steam copy with an activation-required message. It also removes the multiplayer shortcut argument accidentally retained in 0.1.2-melty. The recipe now uses the normal detected-game launch with -nobattleye only. It changes packaging and launch arguments; the tested Minecraft/GTA gameplay components remain the same. Normal Rockstar/Steam authentication still applies. An account sign-in, if required by Rockstar, must be completed by the player.
 
 For the Steam edition, Melty detects GTA V Legacy as Steam app 271590 and uses the player's installed Steam launcher, forwarding the recipe's Story Mode arguments. The recipe uses `launch.kind: game` so the primary game and install folder come from Melty's detection. It does not hard-code a Steam library folder or start GTA5.exe directly. Minecraft starts first; Steam/Rockstar startup can take additional time before the GTA window appears. The local Steam copy was verified at build 1.0.3889.0, with the exact current plugin, ReShade runtime and native mapping loaded after launch. This verifies launch and loading; longer gameplay testing remains separate.
 
@@ -29,3 +29,7 @@ packaging/gta-config/ holds the ReShade configuration templates used for the rel
 ## Player data
 
 The account association and dedicated Minecraft world stay under LocalAppData/MinecraftGTAV/prism. Preserve that folder to keep builds. File destinations are in melty.json; remove release files with both games closed and restore previous ReShade configurations from the installer's backup. Shared loaders may be used by other mods. See included credits/licenses.
+
+## Melty Testing verification
+
+Version 0.1.4-melty maps the Minecraft mod and Fabric API straight into the active Prism instance's .minecraft/mods folder. Fabric's real loading log is next to that folder, so Melty can confirm both jars loaded. Previous packages put them in a runtime staging folder and copied them on launch; Melty looked beside those staging files and could not find their loading log. The helper now also supports a fresh install with no staging mods folder. No verification logs or success events are fabricated.
