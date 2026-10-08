@@ -13,8 +13,9 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parents[1]
 WORK = PROJECT.parent
 DOWNLOADS = WORK / 'downloads'
-VERSION = '0.1.1-melty'
-STAGE = WORK / ('melty-stage-' + VERSION + '-r5')
+VERSION = '0.1.2-melty'
+MOD_VERSION = '0.1.1-melty'  # Gameplay components are unchanged in this packaging fix.
+STAGE = WORK / ('melty-stage-' + VERSION)
 OUTPUTS = WORK.parent / 'outputs'
 
 def copy(source, destination):
@@ -96,7 +97,7 @@ def main():
         java_prefix=archive.namelist()[0].split('/')[0]+'/'
     extract(DOWNLOADS/'java25-jre.zip', companion/'java', java_prefix)
     copy(PROJECT/'packaging/MinecraftCompanion.exe', companion/'MinecraftCompanion.exe')
-    jars=list((PROJECT/'mc/build/libs').glob('passthrough-'+VERSION+'.jar'))
+    jars=list((PROJECT/'mc/build/libs').glob('passthrough-'+MOD_VERSION+'.jar'))
     if len(jars) != 1:
         raise ValueError('Minecraft rebuilt artifact not found')
     copy(jars[0], companion/'minecraft/mods'/jars[0].name)
@@ -126,7 +127,7 @@ Real Minecraft Java runs beside GTA V Legacy Story Mode: build in Los Santos, us
 
 Requires the player's own GTA V Legacy build 3889 and Minecraft Java 26.3 entitlement. Single player; Enhanced and GTA Online are unsupported.
 
-Melty places all release files, installs Ultimate ASI Loader, starts the bundled configured Minecraft companion and launches GTA with the official offline option. The first Minecraft setup uses Prism's normal Microsoft sign-in. The release contains no player credentials or game content. Dedicated worlds and launcher data remain under the player's LocalAppData/MinecraftGTAV folder.
+Melty places all release files, installs Ultimate ASI Loader, starts the bundled configured Minecraft companion and launches GTA in Story Mode with BattlEye disabled. Rockstar can connect normally to activate the player's Steam copy; offline mode is not forced. The first Minecraft setup uses Prism's normal Microsoft sign-in. The release contains no player credentials or game content. Dedicated worlds and launcher data remain under the player's LocalAppData/MinecraftGTAV folder.
 
 This build removes the ScriptHookV import and bundles portable Prism, Java, Fabric API, ReShade and shader includes. The revised GTA script-loop adapter was tested in GTA Legacy without ScriptHookV loaded: real Minecraft gameplay was visible, movement and menus worked, and the revised test passed the monitored stability interval. Melty's own install-and-Play verification is still required before publication. Unsupported native signatures disable the adapter and write native-adapter.log.
 
@@ -146,7 +147,7 @@ See CREDITS.txt and the included component licenses.
         'mappings':[{'component':'main','from':'gta/','to':'{game}'},{'component':'main','from':'companion/','to':runtime},{'component':'main','from':'docs/','to':root+'/docs'},{'component':'main','from':'melty.json','to':root+'/docs'}],
         'setup':{'label':'Minecraft','launch':launcher,'done':{'file':root+'/prism/instances/minecraft-gta-v/.minecraft/logs/latest.log','contains':'Minecraft companion ready'},'stopWhenDone':False},
         'together':[{'launch':launcher,'startFirst':True,'waitSeconds':5}],
-        'launch':{'kind':'game','args':['-nobattleye','-scofflineonly','-StraightIntoFreemode']},
+        'launch':{'kind':'game','args':['-nobattleye','-StraightIntoFreemode']},
         'runtimeData':[root],
         'notes':{'firstLaunch':'Sign in to your own Minecraft account in the bundled Prism launcher during the first setup. Use Story Mode only.'}
     }

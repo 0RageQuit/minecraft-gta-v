@@ -16,7 +16,7 @@
   "components": [
     {
       "id": "main",
-      "fileName": "Minecraft-GTA-V-0.1.1-melty.zip",
+      "fileName": "Minecraft-GTA-V-0.1.2-melty.zip",
       "label": "Minecraft GTA V and bundled dependencies",
       "kind": "main",
       "required": true
@@ -76,7 +76,6 @@
     "kind": "game",
     "args": [
       "-nobattleye",
-      "-scofflineonly",
       "-StraightIntoFreemode"
     ]
   },
