@@ -1,0 +1,4 @@
+build/
+tests/*.exe
+tests/*.obj
+# MinHook source and ReShade headers are vendored with their license notices.

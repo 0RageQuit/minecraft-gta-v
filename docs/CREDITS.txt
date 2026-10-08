@@ -1,0 +1,12 @@
+Minecraft GTA V: Rehan/universal-modder contributors; Minecraft Ring adaptations: siddoff and justbustin (MIT).
+Native adapter: new independent implementation; ABI approach studied in jason920612/GTAVE-ModLoader (MIT notice retained).
+Native mapping data: TupoyeMenu/BigBaseV2-fix, GPL-2.0; complete unmodified preferred source and GPL text included in native-mapping/.
+MinHook 1.3.4: Tsuda Kageyu and contributors (BSD).
+ReShade 6.8.0: Patrick Mours/crosire (BSD); official shader includes retain their CC0 notices.
+Prism Launcher 11.1.1: Prism Launcher contributors (GPL-3.0). Official corresponding source: https://github.com/PrismLauncher/PrismLauncher/tree/11.1.1
+Prism source archive: https://github.com/PrismLauncher/PrismLauncher/archive/refs/tags/11.1.1.zip
+Eclipse Temurin Java 25.0.4.1+1: OpenJDK and Eclipse Adoptium contributors. Full component notices and GPL/classpath-exception texts are included under companion/java/legal/; matching official source archive and checksum are included under docs/sources/.
+Temurin corresponding source: https://github.com/adoptium/jdk25u/tree/jdk-25.0.4.1+1
+Fabric Loader/Fabric API: FabricMC contributors (Apache-2.0). Loader is specified in the portable instance for Prism's managed setup; API is bundled with its notice.
+Java-WebSocket: TooTallNate and contributors (MIT); nested dependency jar retains its notices.
+No proprietary ScriptHookV runtime/SDK or game-owned models, textures, sounds, levels, accounts, tokens, skins or saves are included.

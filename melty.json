@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "mode": "installed",
+  "games": [
+    {
+      "slug": "gta-v",
+      "role": "primary",
+      "version": "=1.0.3889.0"
+    },
+    {
+      "slug": "minecraft-java",
+      "role": "companion",
+      "version": "=26.3"
+    }
+  ],
+  "components": [
+    {
+      "id": "main",
+      "fileName": "Minecraft-GTA-V-0.1.1-melty.zip",
+      "label": "Minecraft GTA V and bundled dependencies",
+      "kind": "main",
+      "required": true
+    }
+  ],
+  "requirements": [
+    {
+      "kind": "loader",
+      "id": "ultimate-asi-loader"
+    }
+  ],
+  "mappings": [
+    {
+      "component": "main",
+      "from": "gta/",
+      "to": "{game}"
+    },
+    {
+      "component": "main",
+      "from": "companion/",
+      "to": "{localappdata}/MinecraftGTAV/runtime"
+    },
+    {
+      "component": "main",
+      "from": "docs/",
+      "to": "{localappdata}/MinecraftGTAV/docs"
+    },
+    {
+      "component": "main",
+      "from": "melty.json",
+      "to": "{localappdata}/MinecraftGTAV/docs"
+    }
+  ],
+  "setup": {
+    "label": "Minecraft",
+    "launch": {
+      "kind": "exe",
+      "path": "{localappdata}/MinecraftGTAV/runtime/MinecraftCompanion.exe"
+    },
+    "done": {
+      "file": "{localappdata}/MinecraftGTAV/prism/instances/minecraft-gta-v/.minecraft/logs/latest.log",
+      "contains": "Minecraft companion ready"
+    },
+    "stopWhenDone": false
+  },
+  "together": [
+    {
+      "launch": {
+        "kind": "exe",
+        "path": "{localappdata}/MinecraftGTAV/runtime/MinecraftCompanion.exe"
+      },
+      "startFirst": true,
+      "waitSeconds": 5
+    }
+  ],
+  "launch": {
+    "kind": "game",
+    "args": [
+      "-nobattleye",
+      "-scofflineonly",
+      "-StraightIntoFreemode"
+    ]
+  },
+  "runtimeData": [
+    "{localappdata}/MinecraftGTAV"
+  ],
+  "notes": {
+    "firstLaunch": "Sign in to your own Minecraft account in the bundled Prism launcher during the first setup. Use Story Mode only."
+  }
+}
