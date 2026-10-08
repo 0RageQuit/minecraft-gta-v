@@ -42,7 +42,7 @@ Creative: double-tap Space to fly; Space rises, Shift descends. Elytra: equip in
 
 ## Status and limitations
 
-Private development snapshot; no public release published. Not a finished installer.
+[Download v0.1.0, the first public experimental release](https://github.com/0RageQuit/minecraft-gta-v/releases/tag/v0.1.0). The install ZIP contains the custom mod files and INSTALL.md; shared dependencies are installed separately.
 
 Collision on unusual surfaces, shaped blocks, moving platforms and fast camera turns needs broader testing. Recent turn snapshots confirmed filled screen edges but do not prove every transient frame. Some inherited combat/Nether systems have not been reverified in the latest build. Both games run simultaneously and require substantial resources. GTA roads/buildings cannot be mined. GTA Enhanced and GTA Online are not supported by this version.
 
@@ -57,4 +57,5 @@ Development versions: Minecraft Java 26.3, Fabric Loader 0.19.5, Fabric API 0.16
 Derived from [rehan-remade/universal-modder](https://github.com/rehan-remade/universal-modder/tree/main/examples/minecraft-gta5-passthrough). Includes adaptations credited in `mc/src/main/resources/LICENSE-minecraft-ring` to siddoff and justbustin. MIT source license; upstream notices retained. Bundled Java-WebSocket and Gradle wrapper retain their own licenses.
 
 Minecraft belongs to Mojang/Microsoft; GTA V belongs to Rockstar/Take-Two. Unofficial fan project.
+
 
