@@ -13,6 +13,10 @@ Requires Windows, GTA V **Legacy** (development build 3889), Minecraft Java 26.3
 
 GTA Enhanced and GTA Online are unsupported. Game files, accounts, saves and personal skins are not bundled.
 
+### Optional: skip the story
+
+For free roam without playing through the campaign, you can use a completed GTA V Legacy Story Mode save, such as [100% Game Save on GTA5-Mods](https://www.gta5-mods.com/misc/100-save-game). This is optional; an existing free-roam save also works. Back up your own saves and follow the download page's installation instructions. This third-party save has not been tested with this mod.
+
 ## Features
 
 - Minecraft walking, sprinting, sneaking, jumping, creative flight and elytra with firework boosts.
