@@ -13,7 +13,7 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parents[1]
 WORK = PROJECT.parent
 DOWNLOADS = WORK / 'downloads'
-VERSION = '0.1.2-melty'
+VERSION = '0.1.3-melty'
 MOD_VERSION = '0.1.1-melty'  # Gameplay components are unchanged in this packaging fix.
 STAGE = WORK / ('melty-stage-' + VERSION)
 OUTPUTS = WORK.parent / 'outputs'
@@ -147,7 +147,7 @@ See CREDITS.txt and the included component licenses.
         'mappings':[{'component':'main','from':'gta/','to':'{game}'},{'component':'main','from':'companion/','to':runtime},{'component':'main','from':'docs/','to':root+'/docs'},{'component':'main','from':'melty.json','to':root+'/docs'}],
         'setup':{'label':'Minecraft','launch':launcher,'done':{'file':root+'/prism/instances/minecraft-gta-v/.minecraft/logs/latest.log','contains':'Minecraft companion ready'},'stopWhenDone':False},
         'together':[{'launch':launcher,'startFirst':True,'waitSeconds':5}],
-        'launch':{'kind':'game','args':['-nobattleye','-StraightIntoFreemode']},
+        'launch':{'kind':'game','args':['-nobattleye']},
         'runtimeData':[root],
         'notes':{'firstLaunch':'Sign in to your own Minecraft account in the bundled Prism launcher during the first setup. Use Story Mode only.'}
     }

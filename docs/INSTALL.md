@@ -1,4 +1,4 @@
-# Minecraft GTA V — automatic Melty setup (0.1.2-melty candidate)
+# Minecraft GTA V — automatic Melty setup (0.1.3-melty candidate)
 
 Requires the player's own GTA V Legacy build 1.0.3889.0 and Minecraft Java 26.3 entitlement. Both games run on the same Windows PC. Single player, Story Mode only; Enhanced and Online are unsupported.
 
@@ -10,7 +10,7 @@ The release bundles portable Prism, Java 25, Fabric API and the rebuilt Minecraf
 
 First setup asks for the player's own Microsoft account. Prism downloads Minecraft through its normal authenticated flow. The release contains no game content, accounts, skins or saves. Minecraft automatically opens its dedicated world and logs 'Minecraft companion ready'; Melty waits for this before launching GTA in Story Mode with BattlEye disabled. Rockstar connects normally for activation of the player's own copy; the recipe does not force offline mode. Subsequent Play starts both programs. Passthrough is enabled by default once connected. F7 toggles the view, F8 switches Minecraft/GTA controls and F9 relevels the ground.
 
-Version 0.1.2-melty removes the forced-offline argument from 0.1.1-melty, which could make Rockstar close a Steam copy with an activation-required message. It changes packaging and launch arguments; the tested Minecraft/GTA gameplay components remain the same. Normal Rockstar/Steam authentication still applies. An account sign-in, if required by Rockstar, must be completed by the player.
+Version 0.1.3-melty removes the forced-offline argument from 0.1.1-melty, which could make Rockstar close a Steam copy with an activation-required message. It also removes the multiplayer shortcut argument accidentally retained in 0.1.2-melty. The recipe now uses the normal detected-game launch with -nobattleye only. It changes packaging and launch arguments; the tested Minecraft/GTA gameplay components remain the same. Normal Rockstar/Steam authentication still applies. An account sign-in, if required by Rockstar, must be completed by the player.
 
 For the Steam edition, Melty detects GTA V Legacy as Steam app 271590 and uses the player's installed Steam launcher, forwarding the recipe's Story Mode arguments. The recipe uses `launch.kind: game` so the primary game and install folder come from Melty's detection. It does not hard-code a Steam library folder or start GTA5.exe directly. Minecraft starts first; Steam/Rockstar startup can take additional time before the GTA window appears. The local Steam copy was verified at build 1.0.3889.0, with the exact current plugin, ReShade runtime and native mapping loaded after launch. This verifies launch and loading; longer gameplay testing remains separate.
 
