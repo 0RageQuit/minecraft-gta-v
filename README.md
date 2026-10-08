@@ -52,6 +52,9 @@ This is an early release. Unusual terrain, shaped blocks, moving platforms and f
 
 ## Credits and license
 
-Derived from [rehan-remade/universal-modder](https://github.com/rehan-remade/universal-modder/tree/main/examples/minecraft-gta5-passthrough). Minecraft Ring adaptations credit siddoff and justbustin in `mc/src/main/resources/LICENSE-minecraft-ring`. MIT source license; upstream notices and dependency licenses are retained in the source archive.
+This mod builds on the original Minecraft–GTA V passthrough project by [rehan-remade](https://github.com/rehan-remade/universal-modder/tree/main/examples/minecraft-gta5-passthrough). It also uses code adapted from Minecraft Ring by siddoff and justbustin.
 
-Unofficial fan project. Minecraft belongs to Mojang/Microsoft; GTA V belongs to Rockstar/Take-Two.
+The mod's source code is available under the MIT license. The source archive includes the original copyright notices and separate licenses for included dependencies. Minecraft Ring's notice is in `mc/src/main/resources/LICENSE-minecraft-ring`.
+
+This is an unofficial fan-made mod, with no affiliation with Mojang, Microsoft, Rockstar Games or Take-Two. Minecraft and GTA V remain the property of their respective owners; the mod's license does not cover either game.
+
