@@ -65,7 +65,7 @@ def main():
     for name in ('ReShade.fxh',):
         copy(DOWNLOADS/name, gta/'reshade-shaders/Shaders'/name)
     # Preserve the GPL-licensed mapping's complete preferred source and license.
-    mapping_text=(DOWNLOADS/'crossmap.hpp').read_text()
+    mapping_text=(PROJECT/'docs/native-mapping/crossmap-original.hpp').read_text()
     pairs=dict(re.findall(r'\{(0x[0-9A-F]+),\s*(0x[0-9A-F]+)\}', mapping_text))
     required=set()
     for name in ('natives.h', 'native_runtime.hpp', 'native_runtime.cpp'):
@@ -77,8 +77,8 @@ def main():
     mapping=gta/'MCPassthrough/native-map.csv'
     mapping.parent.mkdir(parents=True)
     mapping.write_text(''.join(a+','+pairs[a]+'\n' for a in sorted(required)))
-    copy(DOWNLOADS/'crossmap.hpp', docs/'native-mapping/crossmap-original.hpp')
-    copy(DOWNLOADS/'LICENSE', docs/'native-mapping/GPL-2.0.txt')
+    copy(PROJECT/'docs/native-mapping/crossmap-original.hpp', docs/'native-mapping/crossmap-original.hpp')
+    copy(PROJECT/'docs/native-mapping/GPL-2.0.txt', docs/'native-mapping/GPL-2.0.txt')
     copy(PROJECT/'LICENSE', docs/'Minecraft-GTA-V-MIT.txt')
     copy(PROJECT/'mc/src/main/resources/LICENSE-minecraft-ring', docs/'Minecraft-Ring-MIT.txt')
     copy(PROJECT/'gta/third_party/minhook/LICENSE.txt', docs/'MinHook-BSD.txt')
