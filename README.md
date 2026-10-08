@@ -2,6 +2,8 @@
 
 **Play real Minecraft inside Los Santos.**
 
+The full source tree, setup notes and current installed mod build are preserved in [Minecraft-GTA-V-private-draft.zip](Minecraft-GTA-V-private-draft.zip). Extract the archive to view or build the project.
+
 An experimental Windows mod that runs Minecraft Java alongside GTA V Legacy Story Mode. Build on GTA streets, play as your Minecraft character, and fly between skyscrapers with an elytra.
 
 This version focuses on Minecraft movement: walking, strafing, sprinting, sneaking, jumping, creative flight, and elytra physics, with terrain and camera collision work to make the two games fit together.
@@ -48,10 +50,11 @@ Collision on unusual surfaces, shaped blocks, moving platforms and fast camera t
 
 Development versions: Minecraft Java 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0+26.3, JDK 25; GTA V Legacy build 3889 with matching ScriptHookV and ReShade 6.8.0 with add-on support.
 
-`installed-build/` contains the exact current custom ASI, Fabric JAR, shader and ReShade configuration, with SHA256 hashes. Obtain shared loaders and Fabric API separately from their official sources. No game files, saves, skins, credentials or third-party loader binaries are bundled. Read [installation notes](docs/INSTALL.md) and the [upstream technical guide](docs/UPSTREAM-README.md). The upstream guide predates the current controls; use the table above.
+`installed-build/` contains the exact current custom ASI, Fabric JAR, shader and ReShade configuration, with SHA256 hashes. Obtain shared loaders and Fabric API separately from their official sources. No game files, saves, skins, credentials or third-party loader binaries are bundled. Read `docs/INSTALL.md` and `docs/UPSTREAM-README.md` inside the archive. The upstream guide predates the current controls; use the table above.
 
 ## Credits and license
 
 Derived from [rehan-remade/universal-modder](https://github.com/rehan-remade/universal-modder/tree/main/examples/minecraft-gta5-passthrough). Includes adaptations credited in `mc/src/main/resources/LICENSE-minecraft-ring` to siddoff and justbustin. MIT source license; upstream notices retained. Bundled Java-WebSocket and Gradle wrapper retain their own licenses.
 
 Minecraft belongs to Mojang/Microsoft; GTA V belongs to Rockstar/Take-Two. Unofficial fan project.
+
