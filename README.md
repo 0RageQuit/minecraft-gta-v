@@ -1,26 +1,28 @@
 # Minecraft × GTA V
 
-**Play real Minecraft inside Los Santos.**
+Run Minecraft Java inside GTA V Legacy Story Mode. Build in Los Santos, use your Minecraft skin, and travel with Minecraft movement, creative flight or an elytra. Both games run together on your PC.
 
-The full source tree, setup notes and current installed mod build are preserved in [Minecraft-GTA-V-private-draft.zip](Minecraft-GTA-V-private-draft.zip). Extract the archive to view or build the project.
+## Download and install
 
-An experimental Windows mod that runs Minecraft Java alongside GTA V Legacy Story Mode. Build on GTA streets, play as your Minecraft character, and fly between skyscrapers with an elytra.
+[Download v0.1.0](https://github.com/0RageQuit/minecraft-gta-v/releases/tag/v0.1.0), the first experimental release.
 
-This version focuses on Minecraft movement: walking, strafing, sprinting, sneaking, jumping, creative flight, and elytra physics, with terrain and camera collision work to make the two games fit together.
+- **To play:** download `Minecraft-GTA-V-v0.1.0.zip` and follow the included `INSTALL.md`.
+- **For source code:** download `Minecraft-GTA-V-v0.1.0-source.zip`. The complete source is inside this archive.
 
-## Current features
+Requires Windows, GTA V **Legacy** (development build 3889), Minecraft Java 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0+26.3 and Java 25. ScriptHookV with an ASI loader and ReShade 6.8.0 with add-on support must be installed separately. Back up your files before installing and use a dedicated Minecraft instance/world.
 
-- Your Minecraft skin, first-person and third-person views, pose changes and vanilla movement FOV effects.
-- Minecraft controls by default; switch to native GTA controls for driving.
-- Building and breaking Minecraft blocks; placed blocks mirrored to GTA collision objects.
-- Minecraft hotbar, held items, HUD, creative inventory/search, offhand items, chat and commands.
-- Persistent builds in a dedicated Minecraft world.
-- Creative flight, elytra steering and firework boosts.
-- TNT/creeper explosions, bows/crossbows, melee and ender pearls with GTA effects.
-- Experimental mobs versus GTA characters/police and cross-game damage.
-- Floor, wall, ceiling and camera collision handling, plus experimental moving-platform support.
-- Experimental survival health/damage and Nether-themed portal, mob and fire/lava interactions.
-- Depth-aware rendering, ambient lighting/grade, opaque block lighting fix and extra world image around the screen edges for camera turns.
+GTA Enhanced and GTA Online are unsupported. Game files, accounts, saves and personal skins are not bundled.
+
+## Features
+
+- Minecraft walking, sprinting, sneaking, jumping, creative flight and elytra with firework boosts.
+- Your Minecraft skin and first- or third-person views.
+- Block placing/breaking, persistent builds and GTA collision for placed blocks.
+- Minecraft inventory, hotbar, offhand, chat, commands and HUD.
+- Switch between Minecraft controls and GTA controls for driving.
+- Rendering and collision fixes for floors, walls, ceilings and camera turns.
+
+Experimental systems include TNT/creeper explosions, bows/crossbows, melee, ender pearls, mobs interacting with GTA characters, survival damage, moving platforms and Nether-themed effects. These need more testing in the current build.
 
 ## Controls
 
@@ -40,22 +42,12 @@ This version focuses on Minecraft movement: walking, strafing, sprinting, sneaki
 
 Creative: double-tap Space to fly; Space rises, Shift descends. Elytra: equip in the chest slot, press Space while airborne, steer with the mouse and use fireworks to boost.
 
-## Status and limitations
+## Known limitations
 
-[Download v0.1.0, the first public experimental release](https://github.com/0RageQuit/minecraft-gta-v/releases/tag/v0.1.0). The install ZIP contains the custom mod files and INSTALL.md; shared dependencies are installed separately.
-
-Collision on unusual surfaces, shaped blocks, moving platforms and fast camera turns needs broader testing. Recent turn snapshots confirmed filled screen edges but do not prove every transient frame. Some inherited combat/Nether systems have not been reverified in the latest build. Both games run simultaneously and require substantial resources. GTA roads/buildings cannot be mined. GTA Enhanced and GTA Online are not supported by this version.
-
-## Setup and builds
-
-Development versions: Minecraft Java 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0+26.3, JDK 25; GTA V Legacy build 3889 with matching ScriptHookV and ReShade 6.8.0 with add-on support.
-
-`installed-build/` contains the exact current custom ASI, Fabric JAR, shader and ReShade configuration, with SHA256 hashes. Obtain shared loaders and Fabric API separately from their official sources. No game files, saves, skins, credentials or third-party loader binaries are bundled. Read `docs/INSTALL.md` and `docs/UPSTREAM-README.md` inside the archive. The upstream guide predates the current controls; use the table above.
+This is an early release. Unusual terrain, shaped blocks, moving platforms and fast camera turns can still expose collision or rendering issues. Running both games requires substantial resources. GTA roads and buildings cannot be mined.
 
 ## Credits and license
 
-Derived from [rehan-remade/universal-modder](https://github.com/rehan-remade/universal-modder/tree/main/examples/minecraft-gta5-passthrough). Includes adaptations credited in `mc/src/main/resources/LICENSE-minecraft-ring` to siddoff and justbustin. MIT source license; upstream notices retained. Bundled Java-WebSocket and Gradle wrapper retain their own licenses.
+Derived from [rehan-remade/universal-modder](https://github.com/rehan-remade/universal-modder/tree/main/examples/minecraft-gta5-passthrough). Minecraft Ring adaptations credit siddoff and justbustin in `mc/src/main/resources/LICENSE-minecraft-ring`. MIT source license; upstream notices and dependency licenses are retained in the source archive.
 
-Minecraft belongs to Mojang/Microsoft; GTA V belongs to Rockstar/Take-Two. Unofficial fan project.
-
-
+Unofficial fan project. Minecraft belongs to Mojang/Microsoft; GTA V belongs to Rockstar/Take-Two.
