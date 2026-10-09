@@ -22,3 +22,6 @@ installed-build/
 *.dmp
 *.zip
 *.gif
+
+# Gameplay clips shown on the repository front page.
+!docs/media/gameplay-*.gif

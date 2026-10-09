@@ -6,6 +6,16 @@ An experimental Windows mod that runs Minecraft Java alongside GTA V Legacy Stor
 
 This version focuses on Minecraft movement: walking, strafing, sprinting, sneaking, jumping, creative flight, and elytra physics, with terrain and camera collision work to make the two games fit together.
 
+## Gameplay
+
+![Minecraft x GTA V gameplay clip 1](docs/media/gameplay-01.gif)
+
+![Minecraft x GTA V gameplay clip 2](docs/media/gameplay-02.gif)
+
+![Minecraft x GTA V gameplay clip 3](docs/media/gameplay-03.gif)
+
+![Minecraft x GTA V gameplay clip 4](docs/media/gameplay-04.gif)
+
 ## Current features
 
 - Your Minecraft skin, first-person and third-person views, pose changes and vanilla movement FOV effects.
