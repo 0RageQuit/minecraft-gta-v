@@ -1,0 +1,9 @@
+Minecraft × GTA V — 0.1.7 combat update
+
+Crossbow fireworks destroy GTA vehicles within 6 metres of their burst, including direct hits on long vehicles. Timed bursts and Minecraft block impacts also reach GTA. Elytra boosts remain unchanged.
+Player bow/crossbow arrows hit Minecraft NPC stand-ins and forward their vanilla arrow damage to GTA at 12 GTA health per Minecraft damage point. NPC stand-ins are maintained even without Minecraft mobs nearby. Minecraft continues to resolve arrows against its own mobs. Projectile hits are consumed once until Minecraft removes them.
+TNT destroys GTA vehicles within 8 metres of the blast (twice the Minecraft explosion radius, capped at 16 metres for larger TNT explosions).
+
+Both halves compile. Native-mocked regression checks pass for vehicle radius, direct rocket impacts, NPC arrow damage, Minecraft mob isolation, duplicate hit suppression and empty-list cleanup. The firework injection target was checked against the Minecraft 26.3 class. An initial live test exposed two missing vehicle/ped enumeration native mappings; this corrected package now generates and checks mappings from all native wrapper sources. Live retesting remains necessary.
+
+Install as an update through the existing Melty package workflow using the included melty.json. For an existing manual installation, close both games and replace gta/MCPassthrough.asi beside GTA5.exe, gta/MCPassthrough/native-map.csv in its matching folder, and the passthrough mod jar in the dedicated Prism instance's .minecraft/mods folder. Remove the previous passthrough jar when installing the new one. Keep Fabric API and player worlds/accounts.

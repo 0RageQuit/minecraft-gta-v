@@ -171,6 +171,7 @@ namespace natives
 	inline void SetPedKeepTask(Ped p, BOOL on) { invoke<Void>(0x971D38760FBC02EF, p, on); }
 	inline void SetHeliBladesFullSpeed(Vehicle v) { invoke<Void>(0xA178472EBB8AE60D, v); }
 	inline void SetVehicleEngineOn(Vehicle v, BOOL on) { invoke<Void>(0x2497C4717C8B881E, v, on, TRUE, FALSE); }
+	inline void ExplodeVehicle(Vehicle v) { invoke<Void>(0xBA71116ADF5B514C, v, TRUE, FALSE); }
 	inline BOOL GetClosestVehicleNodeWithHeading(float x, float y, float z, Vector3 *out, float *heading)
 	{
 		return invoke<BOOL>(0xFF071FB798B803B0, x, y, z, out, heading, 1, 3.0f, 0);
@@ -226,7 +227,7 @@ namespace natives
 	inline BOOL IsPedInParachuteFreeFall(Ped p) { return invoke<BOOL>(0x7DCE8BDA0F1C1200, p); }
 	inline Vector3 GetEntityVelocity(Entity e) { return invoke<Vector3>(0x4805D2B1D8CF94A9, e); }
 	inline Vector3 GetGameplayCamRot(int order) { return invoke<Vector3>(0x837765A25378F0BB, order); }
-	inline void SetEntityAlpha(Entity e, int alpha) { invoke<Void>(0x44A0870B7E92D7C0, e, alpha, FALSE); }
+	inline void SetEntityAlpha(Entity e, int alpha, BOOL skin = FALSE) { invoke<Void>(0x44A0870B7E92D7C0, e, alpha, skin); }
 	inline int GetClockHours() { return invoke<int>(0x25223CA6B4D20B7F); }
 	inline int GetClockMinutes() { return invoke<int>(0x13D2B8ADD79640F2); }
 

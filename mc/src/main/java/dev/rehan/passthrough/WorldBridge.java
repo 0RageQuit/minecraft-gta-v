@@ -159,6 +159,8 @@ public final class WorldBridge {
 
 		if (b != null) {
 			Passthrough.events.accept(b.append("]}").toString());
+		} else {
+			Passthrough.events.accept("{\"t\":\"proj\",\"p\":[]}");
 		}
 	}
 

@@ -13,8 +13,8 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parents[1]
 WORK = PROJECT.parent
 DOWNLOADS = WORK / 'downloads'
-VERSION = '0.1.4-melty'
-MOD_VERSION = '0.1.1-melty'  # Gameplay components are unchanged in this packaging fix.
+VERSION = '0.1.7-melty'
+MOD_VERSION = '0.1.7-melty'
 STAGE = WORK / ('melty-stage-' + VERSION)
 OUTPUTS = WORK.parent / 'outputs'
 

@@ -4,6 +4,8 @@ import dev.rehan.passthrough.MobWar;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -21,7 +23,7 @@ abstract class ProxyMixin {
 		LivingEntity self = (LivingEntity) (Object) this;
 		if (MobWar.isProxy(self)) {
 			MobWar.onProxyHit(self, source, amount);
-			cir.setReturnValue(false);
+			cir.setReturnValue(source.getEntity() instanceof Player && source.getDirectEntity() instanceof AbstractArrow);
 		}
 	}
 

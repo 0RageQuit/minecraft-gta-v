@@ -44,6 +44,7 @@ namespace
 		float x, y, z;
 		bool firework;
 		bool seen;
+		bool resolved = false;
 	};
 	std::map<int, Projectile> g_projectiles;
 	std::vector<Entity> g_army; // tanks, helicopters and their crews ("army" op), to clear them again
@@ -145,6 +146,8 @@ namespace
 	bool g_started = false;
 	bool g_enabled = true;
 	bool g_playerHidden = false;
+	std::vector<Ped> g_hiddenPlayers;
+	ULONGLONG g_lastConnectedAt = 0;
 	int g_generation = -1;
 	int g_viewSent = 0;
 
@@ -264,7 +267,20 @@ namespace
 
 	void show_player(Ped ped, bool visible)
 	{
-		natives::SetEntityVisible(ped, visible ? TRUE : FALSE, FALSE);
+		// GTA may leave the dead body behind when it creates the respawn ped.
+		// Keep both hidden until the player explicitly leaves passthrough.
+		g_hiddenPlayers.erase(std::remove_if(g_hiddenPlayers.begin(), g_hiddenPlayers.end(),
+			[](Ped p) { return !natives::DoesEntityExist(p); }), g_hiddenPlayers.end());
+		if (!visible && ped && natives::DoesEntityExist(ped) &&
+			std::find(g_hiddenPlayers.begin(), g_hiddenPlayers.end(), ped) == g_hiddenPlayers.end())
+			g_hiddenPlayers.push_back(ped);
+		for (Ped p : g_hiddenPlayers)
+		{
+			natives::SetEntityVisible(p, visible ? TRUE : FALSE, FALSE);
+			natives::SetEntityAlpha(p, visible ? 255 : 0, TRUE);
+			if (!visible) natives::SetEntityLocallyInvisible(p);
+		}
+		if (visible) g_hiddenPlayers.clear();
 		g_playerHidden = !visible;
 	}
 
@@ -538,6 +554,25 @@ namespace
 	/// A Minecraft projectile went from (ax..) to (bx..) this tick (GTA coordinates): if that crosses anything of GTA's,
 	/// a firework blows up there and an arrow lands a bullet in a person or car (or sticks in a wall), and
 	/// Minecraft is told where (so the rocket bursts / the arrow stops there too).
+	void explode_cars(float x, float y, float z, float radius, Vehicle directHit = 0)
+	{
+		int handles[512];
+		const int count = worldGetAllVehicles(handles, 512);
+		for (int i = 0; i < count; ++i)
+		{
+			const Vehicle car = handles[i];
+			if (car == directHit || !natives::DoesEntityExist(car) || natives::GetEntityHealth(car) <= 0)
+				continue;
+			const Vector3 p = natives::GetEntityCoords(car, TRUE);
+			const float dx = p.x - x, dy = p.y - y, dz = p.z - z;
+			if (dx * dx + dy * dy + dz * dz <= radius * radius)
+				natives::ExplodeVehicle(car);
+		}
+		// The impacted vehicle may have its centre outside the blast radius (e.g. a long truck).
+		if (directHit && natives::DoesEntityExist(directHit) && natives::GetEntityHealth(directHit) > 0)
+			natives::ExplodeVehicle(directHit);
+	}
+
 	bool projectile_segment(Ped ped, int id, const Projectile &pr, float bx, float by, float bz)
 	{
 		BOOL hit = FALSE;
@@ -547,7 +582,9 @@ namespace
 		Entity ignore = ped;
 		for (int tries = 0;; ++tries)
 		{
-			const int probe = natives::StartShapeTestLosProbe(sx0, sy0, sz0, bx, by, bz, 1 | 2 | 4 | 8 | 16, ignore);
+			// Arrow/NPC collisions belong to Minecraft's proxies; tracing real peds as well could double damage.
+			const int flags = pr.firework ? 1 | 2 | 4 | 8 | 16 : 1 | 2 | 16;
+			const int probe = natives::StartShapeTestLosProbe(sx0, sy0, sz0, bx, by, bz, flags, ignore);
 			if (natives::GetShapeTestResult(probe, &hit, &end, &normal, &entity) != 2 || !hit)
 				return false;
 			if (entity == 0 || !g_doublePeds.count(entity))
@@ -571,9 +608,12 @@ namespace
 		if (pr.firework)
 		{
 			natives::AddExplosion(end.x, end.y, end.z, 4 /* rocket */, 1.0f, TRUE, FALSE, 0.3f, FALSE);
+			explode_cars(end.x, end.y, end.z, 6.0f, kind == 2 ? entity : 0);
 			shake_from(end.x, end.y, end.z, 0.6f);
 		}
-		else if (kind == 1 || kind == 2)
+		else if (kind == 1)
+			natives::ApplyDamageToPed(entity, 60);
+		else if (kind == 2)
 			natives::ShootSingleBulletBetweenCoords(end.x - ux * 1.0f, end.y - uy * 1.0f, end.z - uz * 1.0f,
 				end.x + ux * 0.6f, end.y + uy * 0.6f, end.z + uz * 0.6f, 250, 0x05FC3C11 /* sniper rifle */, ped);
 		else
@@ -599,6 +639,11 @@ namespace
 				continue;
 			const float gx = float(x), gy = float(-z), gz = float(y) - g_yOffset;
 			auto it = g_projectiles.find(id);
+			if (it != g_projectiles.end() && it->second.resolved)
+			{
+				it->second.seen = true;
+				continue;
+			}
 			// first sighting: trace from Steve's chest, so point-blank shots count
 			const Projectile from = it != g_projectiles.end() ? it->second
 				: Projectile{me.x, me.y, me.z + 0.4f, std::strcmp(kind, "firework") == 0, true};
@@ -606,7 +651,7 @@ namespace
 			{
 				if (it != g_projectiles.end())
 					g_projectiles.erase(it);
-				g_projectiles[id] = {gx, gy, gz, from.firework, true};
+				g_projectiles[id] = {gx, gy, gz, from.firework, true, true};
 				g_projectiles[id].seen = true;
 				continue;
 			}
@@ -818,7 +863,7 @@ namespace
 		const std::string kind = json_str(message, "k");
 		if (kind == "ghast" || kind == "blaze" || kind == "magma_cube")
 			natives::StartEntityFire(victim); // fireballs and molten slime
-		if (kind == "skeleton" || kind == "stray" || kind == "bogged" || kind == "pillager" || kind == "blaze" || kind == "ghast")
+		if (kind == "arrow" || kind == "skeleton" || kind == "stray" || kind == "bogged" || kind == "pillager" || kind == "blaze" || kind == "ghast")
 			return; // arrows and fireballs: the damage is enough, no shove
 		const Vector3 v = natives::GetEntityCoords(victim, TRUE);
 		float dx = v.x - float(fx), dy = v.y - float(-fz);
@@ -946,16 +991,13 @@ namespace
 	{
 		if (g_pendingCops > 0 && squad_spawn_one(player))
 			--g_pendingCops;
-		if (g_mobs.empty())
-			return;
 		const int now = natives::GetGameTimer();
-		if (now - g_mobsSeenAt > 3000)
+		if (!g_mobs.empty() && now - g_mobsSeenAt > 3000)
 		{
 			// Minecraft stopped listing its mobs without an empty list (disconnect, pause): nothing to fight
 			for (auto &[id, m] : g_mobs)
 				double_delete(m);
 			g_mobs.clear();
-			return;
 		}
 		for (auto &[id, m] : g_mobs)
 		{
@@ -1023,6 +1065,8 @@ namespace
 		}
 
 		// police (spawned or not) fight the nearest double; re-tasked only when that one is gone
+		if (g_mobs.empty())
+			return; // NPC proxies are still needed for player arrows when no Minecraft mobs exist.
 		if (now >= g_nextCopTaskAt)
 		{
 			g_nextCopTaskAt = now + 1000;
@@ -1982,6 +2026,13 @@ namespace
 		const double radius = json_num(message, "r", 4.0);
 		g_booms[g_boomNext++ % 8] = {float(x), float(-z), float(y - g_yOffset), natives::GetGameTimer() + 500};
 		const std::string src = json_str(message, "src");
+		if (src == "firework_rocket")
+		{
+			natives::AddExplosion(float(x), float(-z), float(y - g_yOffset), 4, 1.0f, TRUE, FALSE, 0.3f, FALSE);
+			explode_cars(float(x), float(-z), float(y - g_yOffset), 6.0f);
+			shake_from(float(x), float(-z), float(y - g_yOffset), 0.6f);
+			return;
+		}
 		if (src == "fireball" || src == "wither_skull" || src == "dragon_fireball")
 		{
 			// a ghast's fireball: a rocket's blast and burning fuel
@@ -1992,6 +2043,8 @@ namespace
 		}
 		// TNT (radius 4) as a sticky bomb, smaller blasts (creepers are 3) as grenades.
 		natives::AddExplosion(float(x), float(-z), float(y - g_yOffset), radius >= 3.5 ? 2 : 0, 1.0f, TRUE, FALSE, 1.0f, FALSE);
+		if (src == "tnt" || src == "tnt_minecart")
+			explode_cars(float(x), float(-z), float(y - g_yOffset), float(std::clamp(radius * 2.0, 4.0, 16.0)));
 		shake_from(float(x), float(-z), float(y - g_yOffset), radius >= 3.5 ? 1.1f : 0.8f);
 	}
 
@@ -2377,7 +2430,16 @@ namespace
 			g_enabled = !g_enabled;
 			natives::Notify(g_enabled ? "Minecraft passthrough ~g~on" : "Minecraft passthrough ~r~off");
 		}
-		const bool on = g_enabled && g_ws.connected();
+		const bool connected = g_ws.connected();
+		const auto now = GetTickCount64();
+		if (connected) g_lastConnectedAt = now;
+		const bool on = g_enabled && connected;
+		// Re-hide before gameplay work, including during death fades and brief
+		// companion reconnects. F7 still restores GTA's player immediately.
+		const bool keepHidden = g_enabled && (connected ||
+			(g_playerHidden && g_lastConnectedAt && now - g_lastConnectedAt < 15000));
+		if (keepHidden) show_player(ped, false);
+		else if (g_playerHidden) show_player(ped, true);
 		const bool hidden = natives::IsPauseMenuActive() || natives::IsScreenFadedOut() || natives::IsCutsceneActive() || natives::IsPlayerSwitchInProgress();
 		compositor::set_active(on && !hidden);
 		if (!on)
@@ -2386,8 +2448,6 @@ namespace
 			walking_set(false, ped);
 			if (g_drive.on) drive_set(ped, false);
 			minecraft_input(false, hidden);
-			if (g_playerHidden)
-				show_player(ped, true);
 			if (!g_props.live.empty())
 				props_clear_all();
 			if (!g_mobs.empty() || !g_squad.empty())
@@ -2531,8 +2591,9 @@ namespace
 			show_player(ped, false);
 			natives::SetCurrentPedWeapon(ped, kWeaponUnarmed, TRUE);
 		}
-		// A respawn or player-model replacement can reset native visibility while
-		// our cached state still says hidden. Keep the proxy hidden this frame.
+		// Reapply both persistent visibility and alpha after respawns/model changes
+		// and whenever GTA's own scripts make the player visible again.
+		show_player(ped, false);
 		natives::SetEntityLocallyInvisible(ped);
 
 		// Tab: next gun, then back to Minecraft's blocks (not while flying)

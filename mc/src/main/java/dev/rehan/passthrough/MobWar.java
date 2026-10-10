@@ -34,6 +34,7 @@ import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 
 /**
  * Minecraft's mobs vs the host's people. The host lists its people ("peds"); each gets an invisible, AI-less
@@ -115,6 +116,14 @@ public final class MobWar {
 	public static void onProxyHit(final LivingEntity proxy, final DamageSource source, final float amount) {
 		Integer handle = handleOf.get(proxy.getId());
 		Entity attacker = source.getEntity();
+		if (handle != null && attacker instanceof Player && source.getDirectEntity() instanceof AbstractArrow arrow) {
+			if (Passthrough.active && amount > 0) {
+				Passthrough.events.accept(String.format(Locale.ROOT, "{\"t\":\"mobhit\",\"h\":%d,\"d\":%.2f,\"from\":[%.3f,%.3f,%.3f],\"k\":\"arrow\"}",
+					handle, amount, arrow.getX(), arrow.getY(), arrow.getZ()));
+				arrow.discard();
+			}
+			return;
+		}
 		if (source.getDirectEntity() instanceof Projectile projectile && !(attacker instanceof Player)) {
 			projectile.discard(); // a skeleton's arrow ends in the person it hit
 		}
