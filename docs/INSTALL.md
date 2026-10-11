@@ -1,4 +1,4 @@
-# Minecraft GTA V — automatic Melty setup (0.1.4-melty candidate)
+# Minecraft GTA V — automatic Melty setup (0.1.8)
 
 Requires the player's own GTA V Legacy build 1.0.3889.0 and Minecraft Java 26.3 entitlement. Both games run on the same Windows PC. Single player, Story Mode only; Enhanced and Online are unsupported.
 
@@ -16,7 +16,7 @@ For the Steam edition, Melty detects GTA V Legacy as Steam app 271590 and uses t
 
 ## Verification status
 
-Both mod halves compile. The ASI imports Windows libraries only. Melty's check of the submitted release passes with all 424 archive entries mapped and no manual install steps. The Minecraft companion reached its world-ready message, and both games ran locally with the revised GTA adapter and no ScriptHookV loaded. The player confirmed movement, inventory/menu controls and F8, and a real gameplay screenshot was attached to the draft. They chose to quit after screenshots; the launcher recorded an error on that exit, so exit behavior and longer sessions need further testing. The Melty listing remains a draft pending full install-and-Play verification and publication approval.
+Version 0.1.8 builds successfully and reaches Minecraft companion ready on Minecraft 26.3. The mod emits Java 21 bytecode against Java 25 APIs; Java 25 is still required at runtime. Both Melty uploads pass the one-click check, map all 426 package entries, and are accepted as test drafts with no blocking findings. Full GTA street gameplay testing remains pending. See [the complete 0.1.8 changelog](../CHANGELOG-0.1.8.md) for the combat and collision fixes and their validation limits.
 
 The adapter fails closed on missing signatures/natives, requires the official -nobattleye argument and disables the mashup if an online session is detected. It does not modify or bypass BattlEye.
 

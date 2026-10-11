@@ -14,6 +14,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.hurtingprojectile.DragonFireball;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -37,11 +38,13 @@ public final class WorldBridge {
 
 	static void attach(final MinecraftServer s) {
 		server = s;
+		MobTerrain.clear();
 		EnvironmentLifeBridge.reset();
 	}
 
 	static void detach() {
 		server = null;
+		MobTerrain.clear();
 		barriers.clear();
 	}
 
@@ -130,6 +133,7 @@ public final class WorldBridge {
 		}
 
 		MobWar.tick(s);
+		MobTerrain.tick(s);
 		Nether.tick(s);
 	}
 
@@ -141,11 +145,14 @@ public final class WorldBridge {
 		StringBuilder b = null;
 		for (Entity e : level.getAllEntities()) {
 			String kind = null;
-			if (!(e instanceof Projectile projectile) || !(projectile.getOwner() instanceof Player)) {
+			if (e instanceof DragonFireball && e.tickCount > 200) { e.discard(); continue; }
+			if (!(e instanceof Projectile projectile) || !(projectile.getOwner() instanceof Player || e instanceof DragonFireball)) {
 				continue;
 			}
 
-			if (e instanceof AbstractArrow arrow && !arrow.entityTags().contains(HIT_TAG) && arrow.getDeltaMovement().lengthSqr() > 1.0E-4) {
+			if (e instanceof DragonFireball) {
+				kind = "dragon_fireball";
+			} else if (e instanceof AbstractArrow arrow && !arrow.entityTags().contains(HIT_TAG) && arrow.getDeltaMovement().lengthSqr() > 1.0E-4) {
 				kind = "arrow";
 			} else if (e instanceof FireworkRocketEntity rocket && rocket.isShotAtAngle()) {
 				kind = "firework"; // not the ones boosting an elytra flight
@@ -177,7 +184,10 @@ public final class WorldBridge {
 		s.execute(() -> {
 			ServerLevel level = s.overworld();
 			Entity e = level.getEntity(id);
-			if (e instanceof FireworkRocketEntity) {
+			if (e instanceof DragonFireball && !e.isRemoved()) {
+				level.explode(e, x, y, z, 3.0F, net.minecraft.world.level.Level.ExplosionInteraction.MOB);
+				e.discard();
+			} else if (e instanceof FireworkRocketEntity) {
 				e.setPos(x, y, z);
 				level.broadcastEntityEvent(e, (byte) 17);
 				e.discard();

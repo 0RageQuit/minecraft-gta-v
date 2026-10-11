@@ -2,6 +2,7 @@ package dev.rehan.passthrough.mixin;
 
 import com.google.common.collect.Iterables;
 import dev.rehan.passthrough.NativeTerrain;
+import dev.rehan.passthrough.MobTerrain;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.CollisionGetter;
 import net.minecraft.world.phys.AABB;
@@ -21,5 +22,7 @@ public interface CollisionGetterMixin {
 		Entity entity = context instanceof EntityCollisionContext c ? c.getEntity() : null;
 		var contacts = NativeTerrain.contacts(entity, area);
 		if (!contacts.isEmpty()) callback.setReturnValue(Iterables.concat(callback.getReturnValue(), contacts));
+		var mobContacts = MobTerrain.contacts(entity, area);
+		if (!mobContacts.isEmpty()) callback.setReturnValue(Iterables.concat(callback.getReturnValue(), mobContacts));
 	}
 }

@@ -13,8 +13,8 @@ from pathlib import Path
 PROJECT = Path(__file__).resolve().parents[1]
 WORK = PROJECT.parent
 DOWNLOADS = WORK / 'downloads'
-VERSION = '0.1.7-melty'
-MOD_VERSION = '0.1.7-melty'
+VERSION = '0.1.8-melty'
+MOD_VERSION = '0.1.8'
 STAGE = WORK / ('melty-stage-' + VERSION)
 OUTPUTS = WORK.parent / 'outputs'
 
@@ -121,7 +121,7 @@ Java-WebSocket: TooTallNate and contributors (MIT); nested dependency jar retain
 No proprietary ScriptHookV runtime/SDK or game-owned models, textures, sounds, levels, accounts, tokens, skins or saves are included.
 '''
     (docs/'CREDITS.txt').write_text(credits)
-    (docs/'README.md').write_text('''# Minecraft GTA V â€” Melty development candidate
+    (docs/'README.md').write_text('''# Minecraft GTA V — Melty development candidate
 
 Real Minecraft Java runs beside GTA V Legacy Story Mode: build in Los Santos, use Minecraft movement and inventory, and fly with an elytra. The gameplay feature list remains in the project README.
 

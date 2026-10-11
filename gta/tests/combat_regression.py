@@ -27,7 +27,7 @@ prefix = r'''
 using Entity=int; using Ped=int; using Vehicle=int; using BOOL=int;
 constexpr int TRUE=1,FALSE=0;
 struct Vector3 {float x,y,z;};
-struct Projectile {float x,y,z; bool firework,seen,resolved=false;};
+struct Projectile {float x,y,z; bool firework,seen,resolved=false,dragon=false; int probe=0; float probeX=0,probeY=0,probeZ=0;};
 std::map<int,Projectile> g_projectiles;
 std::set<int> g_doublePeds, g_pedsSent;
 float g_mobHitScale=12;
@@ -36,17 +36,21 @@ float g_yOffset=10;
 std::map<int,Vector3> positions;
 std::vector<int> cars, destroyed;
 int victim=0, damage=0, blasts=0, messages=0;
+int gameTime=0; bool pending=false;
+struct FakeWs {std::vector<std::string> sent; void send(const std::string &s){sent.push_back(s);}} g_ws;
 struct Hit {int entity; Vector3 end;};
 std::vector<Hit> hits;
 int worldGetAllVehicles(int* out,int cap) {int n=0; for(int v:cars) if(n<cap)out[n++]=v; return n;}
 namespace natives {
+int GetGameTimer(){return gameTime;}
 bool DoesEntityExist(int e){return positions.count(e);}
 int GetEntityHealth(int){return 100;}
 Vector3 GetEntityCoords(int e,BOOL){return positions[e];}
 void ExplodeVehicle(int e){destroyed.push_back(e);}
 int traceFlags=0;
 int StartShapeTestLosProbe(float,float,float,float,float,float,int flags,int){traceFlags=flags;return 1;}
-int GetShapeTestResult(int,BOOL*hit,Vector3*end,Vector3*,Entity*e){
+int GetShapeTestResult(int,BOOL*hit,Vector3*end,Vector3*normal,Entity*e){
+  if(pending){pending=false;return 1;} *normal={1,0,0};
   *hit=!hits.empty(); if(*hit){*e=hits.front().entity;*end=hits.front().end;hits.erase(hits.begin());if(*e>4 && !(traceFlags & 4))*hit=false;}return 2;
 }
 int GetEntityType(int e){return e==2 || e==3 ? 2 : 1;}
@@ -84,9 +88,33 @@ int main(){
  projectiles_message(1,packet); assert(blasts==1 && messages==1 && !destroyed.empty());
  hits={{2,{1,0,0}}}; projectiles_message(1,packet); assert(blasts==1 && messages==1);
  projectiles_message(1,R"({"t":"proj","p":[]})"); assert(g_projectiles.empty());
+ // Boss projectiles start at the dragon, retain pending traces, and resolve exactly once.
+ hits.clear(); destroyed.clear(); messages=blasts=0;
+ projectiles_message(1,R"({"t":"proj","p":[[50,"dragon_fireball",30,40,0]]})");
+ assert(messages==0 && g_projectiles[50].x==30 && g_projectiles[50].z==30);
+ projectiles_message(1,R"({"t":"proj","p":[[50,"dragon_fireball",31,40,0]]})");
+ assert(g_projectiles[50].probe!=0);
+ pending=true; hits={{2,{1,0,0}}};
+ projectiles_message(1,R"({"t":"proj","p":[[50,"dragon_fireball",32,40,0]]})");
+ assert(messages==0 && g_projectiles[50].probe!=0);
+ projectiles_message(1,R"({"t":"proj","p":[[50,"dragon_fireball",33,40,0]]})");
+ assert(messages==1 && blasts==0 && !destroyed.empty() && g_projectiles[50].resolved);
+ projectiles_message(1,R"({"t":"proj","p":[[50,"dragon_fireball",34,40,0]]})");
+ assert(messages==1);
+ Projectile dragonShot{0,0,0,false,true,false,true};
+ assert(!dragon_segment(1,51,dragonShot,2,0,0));
+ hits={{5,{1,0,0}}};
+ assert(dragon_segment(1,51,dragonShot,3,0,0)); assert((natives::traceFlags & 4)!=0);
+ // Body-specific probes include passive mobs and the dragon's larger bounds, with expiry.
+ mobterrain_message(R"({"t":"mobterrain","m":[[60,-.3,10,-.3,.3,11.8,.3,0,0,0],[61,-8,10,-8,8,18,8,0,0,0]]})");
+ assert(g_mobBodies.size()==2 && g_mobBodies[61].rx==8);
+ mobterrain_tick(1); hits={{0,{1,0,1}}}; mobterrain_tick(1);
+ assert(!g_ws.sent.empty());
+ gameTime=600; mobterrain_tick(1); assert(g_mobBodies.empty());
  puts("Combat regression checks passed: rocket hits, TNT radius, NPC arrows, mob isolation, duplicate suppression and cleanup.");
 }
 '''
 out=root/'build/combat_regression.cpp'
 out.parent.mkdir(exist_ok=True)
-out.write_text(prefix+'\n'.join(function(s) for s in ['const char *json_value(', 'double json_num(', 'std::string json_str(', 'void explode_cars(', 'bool projectile_segment(', 'void projectiles_message(', 'void mobhit_message('])+tests)
+terrain_structs=source[source.index('\tstruct MobContactProbe'):source.index('\tvoid mobterrain_message')]
+out.write_text(prefix+terrain_structs+'\n'.join(function(s) for s in ['const char *json_value(', 'double json_num(', 'std::string json_str(', 'void explode_cars(', 'bool projectile_segment(', 'bool dragon_segment(', 'void projectiles_message(', 'void mobhit_message(', 'void mobterrain_message(', 'void mobterrain_tick('])+tests)

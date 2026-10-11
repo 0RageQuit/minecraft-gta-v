@@ -72,6 +72,8 @@ public final class HostLink extends WebSocketServer {
 				case "cam" -> HostState.update(m);
 				case "ground" -> WorldBridge.solid(ints(m.getAsJsonArray("c")));
 				case "contacts" -> dev.rehan.passthrough.NativeTerrain.update(m.getAsJsonArray("boxes"), m.has("floorCount") ? m.get("floorCount").getAsInt() : 0);
+				case "mobcontacts" -> dev.rehan.passthrough.MobTerrain.update(m.get("id").getAsInt(), m.getAsJsonArray("boxes"));
+				case "vehicles" -> dev.rehan.passthrough.DragonTraffic.update(m.getAsJsonArray("v"));
 				case "hostdamage" -> dev.rehan.passthrough.EnvironmentLifeBridge.damage(m.get("d").getAsDouble(), false);
 				case "hostdeath" -> dev.rehan.passthrough.EnvironmentLifeBridge.damage(0, true);
 				case "clear" -> WorldBridge.clearSolid();

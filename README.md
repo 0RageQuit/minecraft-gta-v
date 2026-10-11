@@ -50,7 +50,7 @@ Creative: double-tap Space to fly; Space rises, Shift descends. Elytra: equip in
 
 ## Status and limitations
 
-Experimental release 0.1.4-melty. Both mod halves build. The submitted Melty draft passes its one-click check with no manual installation steps. The revised native adapter was played locally in GTA Legacy Story Mode without ScriptHookV: Minecraft movement, inventory/menu controls and F8 worked, and real gameplay media was captured. The player chose to quit after that session; the launcher recorded an exit error, which remains a testing limitation. The creator completed the install-and-Play verification through Melty, and Melty confirms version 0.1.4-melty is live.
+Experimental release 0.1.8 adds active Ender Dragon combat and GTA collision samples for nearby mobs. Both production components build, automated combat regression checks pass, and the Minecraft 26.3 runtime reached its ready message. Both Melty projects accept 0.1.8 as test drafts. Full GTA street gameplay testing remains pending. See [all fixes in 0.1.8](CHANGELOG-0.1.8.md).
 
 Collision on unusual surfaces, shaped blocks, moving platforms and fast camera turns needs broader testing. Recent turn snapshots confirmed filled screen edges but do not prove every transient frame. Some inherited combat/Nether systems have not been reverified in the latest build. Both games run simultaneously and require substantial resources. GTA roads/buildings cannot be mined. GTA Enhanced and GTA Online are not supported by this version.
 
@@ -60,7 +60,7 @@ Supported development versions: Minecraft Java 26.3, Fabric Loader 0.19.5, Fabri
 
 The Melty release contains the rebuilt GTA ASI, Fabric mod, shader, ReShade runtime, portable Prism launcher, Java and Fabric API. `melty.json` maps every file and starts both games. Melty installs Ultimate ASI Loader; ScriptHookV is no longer imported or required by the rebuilt plugin. The companion configures a dedicated Minecraft instance automatically. First setup asks for the player's own Microsoft account, and Prism obtains Minecraft through its normal authenticated download. No game content, saves, skins or player credentials are shipped.
 
-Version 0.1.7-melty is [live on Melty](https://melty.gg/m/minecraft-x-gta-v-more-fixes). See the [latest GitHub release](https://github.com/0RageQuit/minecraft-gta-v/releases/tag/v0.1.7) for the playable ZIP, editable source, install recipe and four gameplay GIFs. The playable archive is `Minecraft-GTA-V-0.1.7-melty.zip`; the separate source ZIP is for development. The older v0.1.0 release and root `Minecraft-GTA-V-private-draft.zip` are historical builds that require manual setup.
+Download the [0.1.8 GitHub pre-release](https://github.com/0RageQuit/minecraft-gta-v/releases/tag/v0.1.8) for the full playable ZIP, editable source and install recipe. The playable archive is `Minecraft-GTA-V-0.1.8-melty.zip`; the separate source ZIP is for development. Version 0.1.8 is available as a test draft in both Melty projects; their public Play releases remain 0.1.7.
 
 See [installation notes](docs/INSTALL.md) for the automatic setup and build instructions. [The upstream technical guide](docs/UPSTREAM-README.md) describes historical 0.1.0 setup and must not be used as the new release instructions. See [dependency credits](docs/CREDITS.txt) for the bundled components and their separate licenses.
 

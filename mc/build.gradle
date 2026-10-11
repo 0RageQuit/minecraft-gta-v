@@ -38,9 +38,10 @@ processResources {
 	filesMatching("fabric.mod.json") { expand "version": version }
 }
 
-tasks.withType(JavaCompile).configureEach { it.options.release = 25 }
+// Emit Java 21 bytecode against Java 25 APIs used by the frame bridge.
+// Runtime remains Java 25 (fabric.mod.json); --release 21 cannot expose those APIs.
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_25
-	targetCompatibility = JavaVersion.VERSION_25
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
 }

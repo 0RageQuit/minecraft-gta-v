@@ -45,6 +45,9 @@ namespace
 		bool firework;
 		bool seen;
 		bool resolved = false;
+		bool dragon = false;
+		int probe = 0;
+		float probeX = 0, probeY = 0, probeZ = 0;
 	};
 	std::map<int, Projectile> g_projectiles;
 	std::vector<Entity> g_army; // tanks, helicopters and their crews ("army" op), to clear them again
@@ -583,7 +586,7 @@ namespace
 		for (int tries = 0;; ++tries)
 		{
 			// Arrow/NPC collisions belong to Minecraft's proxies; tracing real peds as well could double damage.
-			const int flags = pr.firework ? 1 | 2 | 4 | 8 | 16 : 1 | 2 | 16;
+			const int flags = pr.firework || pr.dragon ? 1 | 2 | 4 | 8 | 16 : 1 | 2 | 16;
 			const int probe = natives::StartShapeTestLosProbe(sx0, sy0, sz0, bx, by, bz, flags, ignore);
 			if (natives::GetShapeTestResult(probe, &hit, &end, &normal, &entity) != 2 || !hit)
 				return false;
@@ -605,7 +608,13 @@ namespace
 		const float ux = dx / len, uy = dy / len, uz = dz / len;
 		const int kind = entity != 0 ? natives::GetEntityType(entity) : 0; // 1 ped, 2 vehicle, 3 object
 		bool stick = false;
-		if (pr.firework)
+		if (pr.dragon)
+		{
+			// Minecraft detonates it once and reports the shared explosion back to GTA.
+			// Do not add a second native blast here.
+			explode_cars(end.x, end.y, end.z, 6.0f, kind == 2 ? entity : 0);
+		}
+		else if (pr.firework)
 		{
 			natives::AddExplosion(end.x, end.y, end.z, 4 /* rocket */, 1.0f, TRUE, FALSE, 0.3f, FALSE);
 			explode_cars(end.x, end.y, end.z, 6.0f, kind == 2 ? entity : 0);
@@ -623,7 +632,27 @@ namespace
 		return true;
 	}
 
-	/// {"t":"proj","p":[[id,"arrow"|"firework",x,y,z],...]} (Minecraft coordinates), every tick while any fly.
+	bool dragon_segment(Ped player, int id, Projectile &pr, float x, float y, float z) {
+		if (pr.probe) {
+			BOOL hit=FALSE; Vector3 end={}, normal={}; Entity entity=0;
+			const int status=natives::GetShapeTestResult(pr.probe,&hit,&end,&normal,&entity);
+			if (status==1) return false;
+			pr.probe=0;
+			if (status==2 && hit && !g_doublePeds.count(entity)) {
+				explode_cars(end.x,end.y,end.z,6.0f,entity && natives::GetEntityType(entity)==2 ? entity : 0);
+				sendf("{\"t\":\"projhit\",\"id\":%d,\"pos\":[%.3f,%.3f,%.3f],\"stick\":false}",id,end.x,end.z+g_yOffset,-end.y);
+				return true;
+			}
+			if (status==2) { pr.x=pr.probeX; pr.y=pr.probeY; pr.z=pr.probeZ; }
+		}
+		const float dx=x-pr.x,dy=y-pr.y,dz=z-pr.z;
+		if (dx*dx+dy*dy+dz*dz<.00001f) return false;
+		pr.probe=natives::StartShapeTestLosProbe(pr.x,pr.y,pr.z,x,y,z,1|2|4|8|16,player);
+		pr.probeX=x; pr.probeY=y; pr.probeZ=z;
+		return false;
+	}
+
+	/// {"t":"proj","p":[[id,"arrow"|"firework"|"dragon_fireball",x,y,z],...]}.
 	void projectiles_message(Ped ped, const std::string &message)
 	{
 		for (auto &[id, pr] : g_projectiles)
@@ -638,10 +667,22 @@ namespace
 			if (sscanf_s(at, "[%d,\"%15[^\"]\",%lf,%lf,%lf]", &id, kind, unsigned(sizeof(kind)), &x, &y, &z) != 5)
 				continue;
 			const float gx = float(x), gy = float(-z), gz = float(y) - g_yOffset;
+			const bool dragon = std::strcmp(kind, "dragon_fireball") == 0;
 			auto it = g_projectiles.find(id);
 			if (it != g_projectiles.end() && it->second.resolved)
 			{
 				it->second.seen = true;
+				continue;
+			}
+			if (dragon && it == g_projectiles.end()) {
+				// A boss shoots from its head, never from Steve's chest.
+				g_projectiles[id] = {gx, gy, gz, false, true, false, true};
+				continue;
+			}
+			if (dragon) {
+				auto &pr=it->second;
+				pr.resolved=dragon_segment(ped,id,pr,gx,gy,gz);
+				pr.seen=true;
 				continue;
 			}
 			// first sighting: trace from Steve's chest, so point-blank shots count
@@ -652,10 +693,12 @@ namespace
 				if (it != g_projectiles.end())
 					g_projectiles.erase(it);
 				g_projectiles[id] = {gx, gy, gz, from.firework, true, true};
+				g_projectiles[id].dragon = dragon;
 				g_projectiles[id].seen = true;
 				continue;
 			}
 			g_projectiles[id] = {gx, gy, gz, from.firework, true};
+			g_projectiles[id].dragon = dragon;
 		}
 		for (auto it = g_projectiles.begin(); it != g_projectiles.end();)
 			it = it->second.seen ? std::next(it) : g_projectiles.erase(it);
@@ -1062,6 +1105,20 @@ namespace
 				g_pedsSent.insert(q);
 			}
 			g_ws.send("{\"t\":\"peds\",\"p\":[" + list + "]}");
+			std::string vehicles;
+			int cars[512], carsSent = 0;
+			const int carCount = worldGetAllVehicles(cars, 512);
+			for (int i = 0; i < carCount && carsSent < 64; ++i) {
+				const Vehicle car = cars[i];
+				if (!natives::DoesEntityExist(car) || natives::GetEntityHealth(car) <= 0) continue;
+				const Vector3 p = natives::GetEntityCoords(car, TRUE);
+				const float dx = p.x - me.x, dy = p.y - me.y, dz = p.z - me.z;
+				if (dx * dx + dy * dy + dz * dz > 96.0f * 96.0f) continue;
+				char row[128];
+				snprintf(row, sizeof(row), "%s[%d,%.3f,%.3f,%.3f]", carsSent++ == 0 ? "" : ",", car, p.x, p.z + 0.5f + g_yOffset, -p.y);
+				vehicles += row;
+			}
+			g_ws.send("{\"t\":\"vehicles\",\"v\":[" + vehicles + "]}");
 		}
 
 		// police (spawned or not) fight the nearest double; re-tasked only when that one is gone
@@ -1912,6 +1969,73 @@ namespace
 		parse("set", [&](auto key) { g_props.pending.push_back(key); });
 	}
 
+	struct MobContactProbe { int handle = 0, updated = 0; bool valid = false; Vector3 point = {}, normal = {}; };
+	struct MobBody { float x = 0, y = 0, z = 0, rx = .3f, ry = .3f, height = 1.8f, vx = 0, vy = 0, vz = 0; int updated = 0; MobContactProbe probes[10]; };
+	std::map<int, MobBody> g_mobBodies;
+	int g_mobProbeCursor = 0, g_mobContactsAt = 0;
+
+	void mobterrain_message(const std::string &message) {
+		const int now = natives::GetGameTimer();
+		const char *at = json_value(message, "m");
+		int count = 0;
+		while (at && (at = std::strchr(at + 1, '[')) != nullptr && count++ < 64) {
+			int id; double x0,y0,z0,x1,y1,z1,vx,vy,vz;
+			if (sscanf_s(at, "[%d,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf]", &id,&x0,&y0,&z0,&x1,&y1,&z1,&vx,&vy,&vz) != 10) continue;
+			if (!std::isfinite(x0+y0+z0+x1+y1+z1+vx+vy+vz) || x1 <= x0 || y1 <= y0 || z1 <= z0) continue;
+			auto &b = g_mobBodies[id];
+			b.x = float((x0+x1)*.5); b.y = float(-(z0+z1)*.5); b.z = float(y0)-g_yOffset;
+			b.rx = std::clamp(float((x1-x0)*.5), .1f, 16.0f); b.ry = std::clamp(float((z1-z0)*.5), .1f, 16.0f);
+			b.height = std::clamp(float(y1-y0), .1f, 16.0f); b.vx=float(vx); b.vy=float(-vz); b.vz=float(vy); b.updated=now;
+		}
+	}
+
+	void mobterrain_tick(Ped player) {
+		const int now = natives::GetGameTimer();
+		for (auto it = g_mobBodies.begin(); it != g_mobBodies.end();) {
+			if (now - it->second.updated > 500) { it = g_mobBodies.erase(it); continue; }
+			for (auto &probe : it->second.probes) if (probe.handle) {
+				BOOL hit = FALSE; Vector3 p = {}, n = {}; Entity entity = 0;
+				const int status = natives::GetShapeTestResult(probe.handle, &hit, &p, &n, &entity);
+				if (status == 1) continue;
+				probe.handle = 0; probe.updated = now;
+				probe.valid = status == 2 && hit && !g_doublePeds.count(entity);
+				probe.point = p; probe.normal = n;
+			}
+			++it;
+		}
+		if (g_mobBodies.empty()) return;
+		// Round robin: bounded work even in a crowd; each mob's own dimensions set the ray reach.
+		for (int submitted = 0; submitted < 32; ++submitted) {
+			const int index = g_mobProbeCursor++ % (int(g_mobBodies.size()) * 10);
+			auto it = g_mobBodies.begin(); std::advance(it, index / 10); auto &b = it->second;
+			const int side = index % 10; auto &probe = b.probes[side];
+			if (probe.handle) continue;
+			float x=b.x, y=b.y, z=b.z + b.height*.5f, tx=x, ty=y, tz=z;
+			if (side < 5) {
+				if (side) { x += (side==1 || side==2 ? -1 : 1)*b.rx*.8f; y += (side==1 || side==3 ? -1 : 1)*b.ry*.8f; }
+				tx=x; ty=y; z=b.z+.5f; tz=b.z-std::max(3.0f, std::fabs(b.vz)*6+.5f);
+			} else if (side == 9) { z=b.z+b.height-.1f; tz=b.z+b.height+std::max(1.0f,std::fabs(b.vz)*6+.5f); }
+			else if (side==5 || side==6) tx += (side==5 ? -1 : 1)*(b.rx+std::fabs(b.vx)*6+1.0f);
+			else ty += (side==7 ? -1 : 1)*(b.ry+std::fabs(b.vy)*6+1.0f);
+			probe.handle = natives::StartShapeTestLosProbe(x,y,z,tx,ty,tz,1|2|16,player);
+		}
+		if (now < g_mobContactsAt) return;
+		g_mobContactsAt=now+50;
+		for (auto &[id,b] : g_mobBodies) {
+			std::string boxes;
+			for (auto &probe : b.probes) if (probe.valid && now-probe.updated < 400) {
+				const auto &p=probe.point; const auto &n=probe.normal;
+				float x0=p.x-b.rx-.5f,x1=p.x+b.rx+.5f,y0=p.y-b.ry-.5f,y1=p.y+b.ry+.5f,z0=b.z-1,z1=b.z+b.height+1;
+				if (n.z>.5f) { z0=p.z-2; z1=p.z; }
+				else if (n.z<-.5f) { z0=p.z; z1=p.z+.15f; }
+				else if (std::fabs(n.x)>std::fabs(n.y)) { x0=p.x+(n.x>0 ? -.15f : 0); x1=x0+.15f; }
+				else { y0=p.y+(n.y>0 ? -.15f : 0); y1=y0+.15f; }
+				char row[200]; snprintf(row,sizeof(row),"%s%.4f,%.4f,%.4f,%.4f,%.4f,%.4f",boxes.empty()?"":",",x0,z0+g_yOffset,-y1,x1,z1+g_yOffset,-y0); boxes+=row;
+			}
+			g_ws.send("{\"t\":\"mobcontacts\",\"id\":"+std::to_string(id)+",\"boxes\":["+boxes+"]}");
+		}
+	}
+
 	/// Messages from Minecraft: explosions become GTA explosions at the same spot; director commands.
 	void handle_event(const std::string &message)
 	{
@@ -1979,6 +2103,7 @@ namespace
 			melee(natives::PlayerPedId(), float(json_num(message, "d", 400.0)));
 			return;
 		}
+		if (type == "mobterrain") { mobterrain_message(message); return; }
 		if (type == "mobs")
 		{
 			mobs_message(message);
@@ -2038,6 +2163,7 @@ namespace
 			// a ghast's fireball: a rocket's blast and burning fuel
 			natives::AddExplosion(float(x), float(-z), float(y - g_yOffset), 4, 1.0f, TRUE, FALSE, 0.6f, FALSE);
 			natives::AddExplosion(float(x), float(-z), float(y - g_yOffset), 3, 1.0f, TRUE, FALSE, 0.0f, FALSE);
+			if (src == "dragon_fireball") explode_cars(float(x), float(-z), float(y - g_yOffset), 6.0f);
 			shake_from(float(x), float(-z), float(y - g_yOffset), 0.8f);
 			return;
 		}
@@ -2540,6 +2666,7 @@ namespace
 		if (g_drive.on)
 			drive_tick(ped);
 		terrain_contacts(ped);
+		mobterrain_tick(ped);
 
 		// The camera GTA rendered with, and where the player stands (Minecraft draws them in third person).
 		const Vector3 c = natives::GetFinalRenderedCamCoord();
