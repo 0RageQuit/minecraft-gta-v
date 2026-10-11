@@ -2,6 +2,8 @@
 
 **Play real Minecraft inside Los Santos.**
 
+[Play on Melty](https://melty.gg/m/minecraft-x-gta-v-more-fixes)
+
 An experimental Windows mod that runs Minecraft Java alongside GTA V Legacy Story Mode. Build on GTA streets, play as your Minecraft character, and fly between skyscrapers with an elytra.
 
 This version focuses on Minecraft movement: walking, strafing, sprinting, sneaking, jumping, creative flight, and elytra physics, with terrain and camera collision work to make the two games fit together.
